@@ -11,6 +11,7 @@ namespace WebApi.AddControllers
     public class BookController : ControllerBase
     {
         private readonly BookDbContext _context;
+        private readonly Ivalidator<CreateBookCommand> _validator;
 
         public BookController(BookDbContext context) 
         {
@@ -67,7 +68,14 @@ namespace WebApi.AddControllers
             {
                 GetDetailQuery query = new GetDetailQuery(_context);
                 query.id = id;//Burada queryden gelen idye getirilecek kitabýn idsi atanýr.
-                query.Handle();//Handle metodu çaðrýlýr.
+            GetByIdValidator validator = new GetByIdValidator();
+        validator.ValidateAndThrow(query);//Validator sýnýfý kullanýlarak idnin doðruluðu kontrol edilir.
+                //Burada validator sýnýfý kullanýlarak idnin doðruluðu kontrol edilir.
+                //Eðer id geçerli deðilse hata fýrlatýlýr.
+                //Eðer id geçerliyse Handle metodu çaðrýlýr.
+                //Handle metodu çaðrýlýr ve result deðiþkenine atanýr.
+
+        query.Handle();//Handle metodu çaðrýlýr.
                 result = query.Handle();//Handle metodu çaðrýlýr ve result deðiþkenine atanýr.
                 //var book = _context.Books.Where(book = book.Id == id).FirstOrDefault;
                 //return book;
@@ -118,6 +126,9 @@ namespace WebApi.AddControllers
     {
         updateCommand.UpdateId = id;
         updateCommand.updateModel = updateBook;
+        UpdateValidator validator = new UpdateValidator();
+        validator.ValidateAndThrow(updateCommand);
+        //Burada validator sýnýfý kullanýlarak idnin doðruluðu kontrol edilir.
         updateCommand.Handle();
     }
     catch (Exception ex)
@@ -145,6 +156,8 @@ namespace WebApi.AddControllers
     try
     {
         command.deleteId = id;
+        DeleteValidator validator = new DeleteValidator();
+        validator.ValidateAndThrow(command);
         command.Handle();
     }
     catch (Exception ex)
